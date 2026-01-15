@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Rewards</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --surface-light: #2c2c2c;
+            --primary-color: #00ff88;
+            --secondary-color: #00d2ff;
+            --gold-color: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background-color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            padding: 20px 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Hero / Streak Display */
+        .streak-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .streak-count {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .streak-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Reward Grid */
+        .reward-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 cols */
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        /* Special style for the 7th day (Big Box) */
+        .day-card.day-7 {
+            grid-column: span 3; /* Take full width */
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            height: 100px;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .day-card {
+            background-color: var(--surface-light);
+            border-radius: var(--border-radius);
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+            opacity: 0.6; /* Default locked state */
+        }
+
+        /* Day Label */
+        .day-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Reward Icon & Value */
+        .reward-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .reward-val {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Colors */
+        .type-cash { color: var(--primary-color); }
+        .type-gem { color: var(--secondary-color); }
+        .type-big { color: var(--gold-color); }
+
+        /* States */
+        
+        /* 1. Claimed (Past) */
+        .day-card.claimed {
+            opacity: 1;
+            border-color: rgba(255,255,255,0.1);
+            background-color: var(--surface-color);
+        }
+        
+        .day-card.claimed::after {
+            content: '\f00c'; /* FontAwesome Check */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--primary-color);
+            border-radius: 14px;
+        }
+
+        /* 2. Active (Today) */
+        .day-card.active {
+            opacity: 1;
+            border-color: var(--primary-color);
+            background: linear-gradient(180deg, var(--surface-light) 0%, #2a3d35 100%);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        /* Claim Button */
+        .claim-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 30px;
+            border: none;
+            background: var(--text-secondary);
+            color: #000;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: not-allowed;
+            transition: all 0.3s;
+        }
+
+        .claim-btn.ready {
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .claim-btn.ready:active {
+            transform: scale(0.98);
+        }
+
+        /* Reset Link (For Testing) */
+        .reset-link {
+            margin-top: 40px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-decoration: underline;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        /* Modal / Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.3s;
+        }
+
+        .reward-popup {
+            background: var(--surface-light);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid var(--primary-color);
+            transform: scale(0.8);
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popUp {
+            to { transform: scale(1); }
+        }
+
+        .popup-icon {
+            font-size: 50px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .popup-title { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+        .popup-desc { color: var(--text-secondary); margin-bottom: 20px; font-size: 14px; }
+        
+        .popup-btn {
+            background: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="header-title">Daily Bonus</div>
+    </header>
+
+    <main>
+        <div class="streak-header">
+            <div class="streak-count" id="streakDisplay">0</div>
+            <div class="streak-label">Day Streak</div>
+        </div>
+
+        <div class="reward-grid" id="rewardGrid">
+            <!-- Grid generated by JS -->
+        </div>
+
+        <button id="mainClaimBtn" class="claim-btn" disabled onclick="claimReward()">
+            Check Back Tomorrow
+        </button>
+
+        <!-- Debugging/Testing Tool -->
+        <div class="reset-link" onclick="resetProgress()">
+            [DEV] Reset Progress & Time
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="reward-popup">
+            <div class="popup-icon"><i class="fa-solid fa-gift"></i></div>
+            <div class="popup-title">Claimed!</div>
+            <div class="popup-desc" id="modalDesc">You received a reward.</div>
+            <button class="popup-btn" onclick="closeModal()">Awesome</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const REWARDS = [
+            { day: 1, type: 'cash', val: 5.00, icon: 'fa-dollar-sign' },
+            { day: 2, type: 'gem', val: 20, icon: 'fa-gem' },
+            { day: 3, type: 'cash', val: 10.00, icon: 'fa-dollar-sign' },
+            { day: 4, type: 'gem', val: 50, icon: 'fa-gem' },
+            { day: 5, type: 'cash', val: 15.00, icon: 'fa-dollar-sign' },
+            { day: 6, type: 'gem', val: 100, icon: 'fa-gem' },
+            { day: 7, type: 'big', val: 'Mega', icon: 'fa-crown', cash: 100, gem: 200 } // Special logic
+        ];
+
+        // State structure in LocalStorage: 
+        // 'dailyData': { streak: number (0-6), lastClaimDate: string (toDateString) }
+
+        document.addEventListener('DOMContentLoaded', initDaily);
+
+        let currentStreak = 0;
+        let canClaim = false;
+
+        function initDaily() {
+            const data = JSON.parse(localStorage.getItem('dailyData') || '{"streak": 0, "lastClaimDate": ""}');
+            const today = new Date().toDateString();
+            
+            // Logic: If last claim was yesterday, increment streak check. 
+            // If last claim was today, user must wait. 
+            // If last claim was > 1 day ago, reset streak (simplified for this demo: we just check if claimed today).
+            
+            currentStreak = data.streak;
+            
+            // Check if already claimed today
+            if (data.lastClaimDate === today) {
+                canClaim = false;
+            } else {
+                // Determine if we should reset (if missed a day) - omitted for simple demo UX, 
+                // just assume they are on the next step of the array.
+                // If streak reached 7 (completed cycle), reset to 0
+                if (currentStreak >= 7) {
+                    currentStreak = 0;
+                }
+                canClaim = true;
+            }
+
+            // If we are pending a claim, the visual streak is 'currentStreak + 1' (the one we are about to take)
+            // If we already claimed, the visual is 'currentStreak' (done)
+            
+            renderGrid(currentStreak, canClaim);
+            updateUI(currentStreak);
+        }
+
+        function updateUI(streak) {
+            // Display streak count
+            document.getElementById('streakDisplay').textContent = streak;
+
+            const btn = document.getElementById('mainClaimBtn');
+            if (canClaim) {
+                btn.textContent = "CLAIM REWARD";
+                btn.classList.add('ready');
+                btn.disabled = false;
+            } else {
+                btn.textContent = "COME BACK TOMORROW";
+                btn.classList.remove('ready');
+                btn.disabled = true;
+            }
+        }
+
+        function renderGrid(completedStreak, isReadyToClaim) {
+            const grid = document.getElementById('rewardGrid');
+            grid.innerHTML = '';
+
+            REWARDS.forEach((reward, index) => {
+                const dayNum = index + 1;
+                const el = document.createElement('div');
+                
+                // Determine CSS Classes
+                let classes = 'day-card';
+                if (dayNum === 7) classes += ' day-7';
+
+                // Logic for state
+                // 1. If index < completedStreak -> CLAIMED
+                // 2. If index == completedStreak AND isReadyToClaim -> ACTIVE
+                // 3. Else -> LOCKED
+                
+                if (index < completedStreak) {
+                    classes += ' claimed';
+                } else if (index === completedStreak && isReadyToClaim) {
+                    classes += ' active';
+                    el.onclick = claimReward; // clickable card
+                }
+
+                // Color helper
+                const colorClass = reward.type === 'cash' ? 'type-cash' : (reward.type === 'gem' ? 'type-gem' : 'type-big');
+                const displayVal = reward.type === 'cash' ? `$${reward.val}` : (reward.val === 'Mega' ? 'MEGA' : `+${reward.val}`);
+
+                el.className = classes;
+                el.innerHTML = `
+                    <div class="day-title">Day ${dayNum}</div>
+                    <i class="fa-solid ${reward.icon} reward-icon ${colorClass}"></i>
+                    <div class="reward-val ${colorClass}">${displayVal}</div>
+                `;
+                
+                grid.appendChild(el);
+            });
+        }
+
+        function claimReward() {
+            if (!canClaim) return;
+
+            const reward = REWARDS[currentStreak];
+            let msg = "";
+
+            // 1. Update Balance/Diamonds
+            let bal = parseFloat(localStorage.getItem('appBalance') || '0');
+            let gems = parseInt(localStorage.getItem('appDiamonds') || '0');
+
+            if (reward.type === 'cash') {
+                bal += reward.val;
+                msg = `You received $${reward.val.toFixed(2)} cash!`;
+            } else if (reward.type === 'gem') {
+                gems += reward.val;
+                msg = `You received ${reward.val} diamonds!`;
+            } else if (reward.type === 'big') {
+                bal += reward.cash;
+                gems += reward.gem;
+                msg = `MEGA JACKPOT! $${reward.cash} & ${reward.gem} Gems!`;
+            }
+
+            localStorage.setItem('appBalance', bal.toFixed(2));
+            localStorage.setItem('appDiamonds', gems);
+
+            // 2. Update Daily State
+            currentStreak++;
+            const newData = {
+                streak: currentStreak,
+                lastClaimDate: new Date().toDateString()
+            };
+            localStorage.setItem('dailyData', JSON.stringify(newData));
+
+            // 3. UI Feedback
+            canClaim = false;
+            
+            // Show Modal
+            document.getElementById('modalDesc').textContent = msg;
+            document.getElementById('successModal').style.display = 'flex';
+            
+            // Re-render background UI
+            renderGrid(currentStreak, false);
+            updateUI(currentStreak);
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // DEV ONLY: Reset
+        function resetProgress() {
+            if(confirm("Reset all daily progress?")) {
+                localStorage.removeItem('dailyData');
+                location.reload();
+            }
+        }
+
+    </script>
+</body>
+</html>

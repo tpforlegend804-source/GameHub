@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Access</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --bg-color: #000000;
+            --surface-color: #121212;
+            --surface-light: #1e1e1e;
+            --gold-gradient: linear-gradient(45deg, #FFD700, #FDB931, #FFD700);
+            --gold-color: #FFD700;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --danger-color: #ff4d4d;
+            --success-color: #00ff88;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 40vh;
+            background: radial-gradient(circle at center, #2c2c2c 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .crown-icon {
+            font-size: 60px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 80%;
+        }
+
+        /* --- BENEFITS LIST --- */
+        .benefits {
+            padding: 0 20px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .b-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold-color);
+            font-size: 18px;
+        }
+
+        .b-text h4 { font-size: 15px; margin-bottom: 2px; }
+        .b-text p { font-size: 12px; color: var(--text-secondary); }
+
+        /* --- PLANS SCROLL --- */
+        .plans-container {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 20px;
+            scrollbar-width: none;
+            margin-top: 10px;
+        }
+        
+        .plans-container::-webkit-scrollbar { display: none; }
+
+        .plan-card {
+            background-color: var(--surface-light);
+            border: 2px solid transparent;
+            border-radius: 18px;
+            padding: 20px;
+            min-width: 140px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .plan-card.selected {
+            border-color: var(--gold-color);
+            background-color: #2a2510;
+            transform: scale(1.05);
+        }
+
+        .best-value {
+            position: absolute;
+            top: -10px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 10px;
+        }
+
+        .plan-name { font-size: 14px; color: var(--text-secondary); margin-bottom: 5px; }
+        .plan-price { font-size: 22px; font-weight: 700; color: white; margin-bottom: 2px; }
+        .plan-period { font-size: 11px; color: var(--text-secondary); }
+
+        /* --- FOOTER ACTION --- */
+        .action-area {
+            padding: 20px;
+            margin-top: auto;
+            background: linear-gradient(0deg, #000 20%, transparent 100%);
+        }
+
+        .sub-btn {
+            width: 100%;
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(253, 185, 49, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .sub-btn:active { transform: scale(0.98); }
+
+        .cancel-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #555;
+            margin-top: 15px;
+        }
+
+        /* --- ACTIVE STATE UI --- */
+        .active-status {
+            display: none; /* Hidden by default */
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 14px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- TOAST --- */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="close-btn" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </header>
+
+    <div class="hero">
+        <i class="fa-solid fa-crown crown-icon"></i>
+        <h1>Premium Pass</h1>
+        
+        <!-- Logic: Show Plans OR Active Status -->
+        <div id="statusBadge" class="active-status">
+            <i class="fa-solid fa-check-circle"></i> ACTIVE
+        </div>
+        
+        <p id="heroText">Unlock exclusive games, remove ads, and get 2x daily rewards.</p>
+    </div>
+
+    <!-- Benefits -->
+    <div class="benefits">
+        <div class="benefit-item">
+            <div class="b-icon"><i class="fa-solid fa-ban"></i></div>
+            <div class="b-text">
+                <h4>No Ads</h4>
+                <p>Enjoy uninterrupted gameplay forever.</p>
+            </div>
+        </div>
+        <div class="benefit-item">
+            <div class="b-icon"><i class="fa-solid fa-gamepad"></i></div>
+            <div class="b-text">
+                <h4>Exclusive Games</h4>
+                <p>Access premium titles in the store.</p>
+            </div>
+        </div>
+        <div class="benefit-item">
+            <div class="b-icon"><i class="fa-solid fa-coins"></i></div>
+            <div class="b-text">
+                <h4>Double Rewards</h4>
+                <p>2x Daily Login Bonus & Diamond drops.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Plans (Hidden if Active) -->
+    <div class="plans-container" id="plansContainer">
+        <!-- Weekly -->
+        <div class="plan-card" onclick="selectPlan('weekly', 2.99, this)">
+            <div class="plan-name">Weekly</div>
+            <div class="plan-price">$2.99</div>
+            <div class="plan-period">/ 7 days</div>
+        </div>
+
+        <!-- Monthly (Best Value) -->
+        <div class="plan-card selected" onclick="selectPlan('monthly', 9.99, this)">
+            <div class="best-value">POPULAR</div>
+            <div class="plan-name">Monthly</div>
+            <div class="plan-price">$9.99</div>
+            <div class="plan-period">/ 30 days</div>
+        </div>
+
+        <!-- Yearly -->
+        <div class="plan-card" onclick="selectPlan('yearly', 49.99, this)">
+            <div class="plan-name">Yearly</div>
+            <div class="plan-price">$49.99</div>
+            <div class="plan-period">/ year</div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button id="mainBtn" class="sub-btn" onclick="processPurchase()">Subscribe Now</button>
+        <button id="cancelBtn" class="cancel-btn" onclick="cancelSub()">Cancel Subscription</button>
+        <p class="disclaimer">By continuing, you agree to the Terms. Balance will be deducted from your wallet.</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Operation Successful</div>
+
+    <script>
+        // --- LOGIC ---
+        
+        let selectedPlan = { type: 'monthly', price: 9.99 };
+
+        document.addEventListener('DOMContentLoaded', checkStatus);
+
+        function checkStatus() {
+            const isPremium = localStorage.getItem('isPremium') === 'true';
+            
+            if (isPremium) {
+                // User IS Premium
+                document.getElementById('plansContainer').style.display = 'none';
+                document.getElementById('mainBtn').style.display = 'none';
+                document.getElementById('cancelBtn').style.display = 'block';
+                document.getElementById('statusBadge').style.display = 'flex';
+                document.getElementById('heroText').textContent = "You have full access to all premium features.";
+                
+                // Disable clicking on benefits or anything else redundant
+            } else {
+                // User is NOT Premium
+                document.getElementById('plansContainer').style.display = 'flex';
+                document.getElementById('mainBtn').style.display = 'block';
+                document.getElementById('cancelBtn').style.display = 'none';
+                document.getElementById('statusBadge').style.display = 'none';
+            }
+        }
+
+        // Selection Logic
+        function selectPlan(type, price, element) {
+            // Update Data
+            selectedPlan = { type: type, price: price };
+
+            // Update UI (Visual Selection)
+            const cards = document.getElementsByClassName('plan-card');
+            for(let card of cards) {
+                card.classList.remove('selected');
+            }
+            element.classList.add('selected');
+
+            // Update Button Text
+            document.getElementById('mainBtn').textContent = `Subscribe for $${price}`;
+        }
+
+        // Purchase Logic
+        function processPurchase() {
+            let currentBalance = parseFloat(localStorage.getItem('appBalance') || '0');
+
+            if (currentBalance < selectedPlan.price) {
+                showToast("Insufficient Wallet Balance", true);
+                return;
+            }
+
+            // Deduct Funds
+            const newBalance = currentBalance - selectedPlan.price;
+            localStorage.setItem('appBalance', newBalance.toFixed(2));
+
+            // Set Premium Status
+            localStorage.setItem('isPremium', 'true');
+            localStorage.setItem('premiumPlan', selectedPlan.type);
+            localStorage.setItem('premiumDate', new Date().toLocaleDateString());
+
+            // Log Transaction
+            const history = JSON.parse(localStorage.getItem('balanceHistory') || '[]');
+            history.unshift({
+                id: Date.now(),
+                type: `Premium (${selectedPlan.type})`,
+                amount: selectedPlan.price,
+                dir: 'minus',
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('balanceHistory', JSON.stringify(history));
+
+            showToast("Welcome to Premium!");
+            
+            // Reload UI to show active state
+            setTimeout(checkStatus, 1000);
+        }
+
+        // Cancellation Logic
+        function cancelSub() {
+            if(confirm("Are you sure you want to lose your benefits?")) {
+                localStorage.setItem('isPremium', 'false');
+                localStorage.removeItem('premiumPlan');
+                
+                showToast("Subscription Cancelled");
+                setTimeout(checkStatus, 1000);
+            }
+        }
+
+        // Toast Helper
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.backgroundColor = isError ? "var(--danger-color)" : "#333";
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>

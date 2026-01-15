@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Store Hub</title>
+    
+    <!-- Google Fonts: Roboto for Android Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --surface-light: #2c2c2c;
+            --primary-color: #00ff88; /* Neon Green for Gaming/Money */
+            --secondary-color: #00d2ff; /* Blue for Diamonds */
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --danger-color: #ff4d4d;
+            --nav-height: 60px;
+            --header-height: 70px;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll, handle in main */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER & SEARCH --- */
+        header {
+            height: var(--header-height);
+            background-color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .header-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: var(--surface-light);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+        }
+
+        .search-container i {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            margin-left: 10px;
+            width: 100%;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* --- BALANCE DASHBOARD --- */
+        .balance-dashboard {
+            padding: 15px 16px;
+            background: linear-gradient(180deg, var(--surface-color) 0%, var(--bg-color) 100%);
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Hide scrollbar */
+        }
+        
+        .balance-dashboard::-webkit-scrollbar {
+            display: none;
+        }
+
+        .stat-card {
+            background-color: var(--surface-light);
+            border-radius: var(--border-radius);
+            padding: 12px 16px;
+            min-width: 140px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .text-cash { color: var(--primary-color); }
+        .text-diamond { color: var(--secondary-color); }
+
+        /* --- MAIN CONTENT (GAME GRID) --- */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 16px 80px 16px; /* Bottom padding for nav */
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 15px 0 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .see-all {
+            font-size: 13px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .game-card {
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .game-thumb {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-color: var(--surface-light);
+            border-radius: 18px; /* Play Store style */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--text-secondary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        
+        .game-thumb:hover {
+            filter: brightness(1.2);
+        }
+
+        /* Mock images using FontAwesome icons inside styled containers */
+        .thumb-premium {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: #fff;
+        }
+        
+        .thumb-arcade {
+            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
+            color: #fff;
+        }
+
+        .game-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .game-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .game-rating {
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 2px;
+        }
+        
+        .star-icon { color: #FFD700; font-size: 9px; }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .bottom-nav {
+            height: var(--nav-height);
+            background-color: var(--surface-color);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 200;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 10px;
+            gap: 4px;
+            width: 20%;
+            height: 100%;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            margin-bottom: 2px;
+            transition: color 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active i {
+            color: var(--primary-color);
+        }
+
+        /* --- DAILY REWARD BANNER --- */
+        .promo-banner {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-text h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .promo-text p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .promo-icon {
+            font-size: 50px;
+            opacity: 0.8;
+            transform: rotate(-15deg);
+        }
+
+        /* Ripple Effect Logic Style */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <!-- Search -->
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search for apps & games">
+            </div>
+            
+            <!-- Header Icons -->
+            <div class="header-icons">
+                <button class="icon-btn" onclick="navigateTo('all_data_crash.html')" title="System Reset">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </button>
+                <button class="icon-btn" onclick="navigateTo('subscription.html')" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Balance Dashboard (Sticky below header) -->
+    <div class="balance-dashboard">
+        <!-- Cash Card -->
+        <div class="stat-card" onclick="navigateTo('balance.html')">
+            <div class="stat-label">
+                <i class="fa-solid fa-wallet text-cash"></i> Balance
+            </div>
+            <div class="stat-value text-cash" id="displayBalance">$0.00</div>
+        </div>
+        
+        <!-- Diamond Card -->
+        <div class="stat-card" onclick="navigateTo('diamonds.html')">
+            <div class="stat-label">
+                <i class="fa-solid fa-gem text-diamond"></i> Diamonds
+            </div>
+            <div class="stat-value text-diamond" id="displayDiamonds">0</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        
+        <!-- Daily Reward Banner -->
+        <div class="promo-banner" onclick="navigateTo('daily_reward.html')">
+            <div class="promo-text">
+                <h3>Daily Rewards</h3>
+                <p>Claim your free cash & diamonds!</p>
+            </div>
+            <div class="promo-icon">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+        </div>
+
+        <!-- Section: Recommended -->
+        <div class="section-title">
+            <span>Recommended for you</span>
+            <a href="#" class="see-all"></a>
+        </div>
+
+        <div class="game-grid" id="gameGrid">
+            <!-- Game 1: Premium Game Template -->
+            <div class="game-card" onclick="navigateTo('game1.html')">
+                <div class="game-thumb thumb-premium">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div class="game-title">Premium Game 1</div>
+                <div class="game-info">Action • 45MB</div>
+                <div class="game-rating">
+                    4.8 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+
+            <!-- Placeholder for visual fullness -->
+            <div class="game-card" onclick="alert('Game 2 Under Construction')">
+                <div class="game-thumb thumb-arcade">
+                    <i class="fa-solid fa-chess-knight"></i>
+                </div>
+                <div class="game-title">Strategy Master</div>
+                <div class="game-info">Strategy • 30MB</div>
+                <div class="game-rating">
+                    4.2 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+
+             <div class="game-card" onclick="alert('Game 3 Under Construction')">
+                <div class="game-thumb" style="background: #333;">
+                    <i class="fa-solid fa-ghost"></i>
+                </div>
+                <div class="game-title">Spooky Run</div>
+                <div class="game-info">Arcade • 22MB</div>
+                <div class="game-rating">
+                    3.9 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+
+            <div class="game-card" onclick="alert('Game 4 Under Construction')">
+                <div class="game-thumb" style="background: #444;">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <div class="game-title">Neon Racer</div>
+                <div class="game-info">Racing • 120MB</div>
+                <div class="game-rating">
+                    4.5 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+            
+            <div class="game-card" onclick="alert('Game 5 Under Construction')">
+                <div class="game-thumb" style="background: #555;">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                </div>
+                <div class="game-title">Block Puzzle</div>
+                <div class="game-info">Puzzle • 15MB</div>
+                <div class="game-rating">
+                    4.0 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+
+             <div class="game-card" onclick="alert('Game 6 Under Construction')">
+                <div class="game-thumb" style="background: #2a2a2a;">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <div class="game-title">Space Shooter</div>
+                <div class="game-info">Action • 60MB</div>
+                <div class="game-rating">
+                    4.6 <i class="fa-solid fa-star star-icon"></i>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="game_history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>History</span>
+        </a>
+        <a href="screen_recording.html" class="nav-item">
+            <i class="fa-solid fa-video"></i>
+            <span>Record</span>
+        </a>
+        <a href="subscription.html" class="nav-item">
+            <i class="fa-solid fa-crown"></i>
+            <span>Premium</span>
+        </a>
+    </nav>
+
+    <script>
+        // --- GLOBAL STATE MANAGEMENT (THE BRIDGE) ---
+        
+        // Default State
+        const DEFAULT_STATE = {
+            balance: 0.00,
+            diamonds: 0,
+            history: [],
+            recordings: []
+        };
+
+        // Initialization
+        function initApp() {
+            // Load from LocalStorage or Set Defaults
+            if (!localStorage.getItem('appBalance')) {
+                localStorage.setItem('appBalance', DEFAULT_STATE.balance.toFixed(2));
+            }
+            if (!localStorage.getItem('appDiamonds')) {
+                localStorage.setItem('appDiamonds', DEFAULT_STATE.diamonds);
+            }
+
+            updateDashboardUI();
+            setupSearch();
+            setupRipple();
+        }
+
+        // Update UI Elements
+        function updateDashboardUI() {
+            const balance = parseFloat(localStorage.getItem('appBalance')).toFixed(2);
+            const diamonds = parseInt(localStorage.getItem('appDiamonds'));
+
+            document.getElementById('displayBalance').textContent = `$${balance}`;
+            document.getElementById('displayDiamonds').textContent = diamonds;
+        }
+
+        // Navigation Helper
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // Search Logic
+        function setupSearch() {
+            const input = document.getElementById('searchInput');
+            const grid = document.getElementById('gameGrid');
+            const games = grid.getElementsByClassName('game-card');
+
+            input.addEventListener('keyup', function() {
+                const filter = input.value.toLowerCase();
+                
+                for (let i = 0; i < games.length; i++) {
+                    const title = games[i].getElementsByClassName('game-title')[0];
+                    const txtValue = title.textContent || title.innerText;
+                    
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        games[i].style.display = "";
+                    } else {
+                        games[i].style.display = "none";
+                    }
+                }
+            });
+        }
+
+        // Material Design Ripple Effect
+        function setupRipple() {
+            document.addEventListener('click', function (e) {
+                const target = e.target.closest('.promo-banner, .stat-card, .game-card, .icon-btn');
+                if (target) {
+                    const circle = document.createElement('span');
+                    const diameter = Math.max(target.clientWidth, target.clientHeight);
+                    const radius = diameter / 2;
+
+                    const rect = target.getBoundingClientRect();
+                    
+                    circle.style.width = circle.style.height = `${diameter}px`;
+                    circle.style.left = `${e.clientX - rect.left - radius}px`;
+                    circle.style.top = `${e.clientY - rect.top - radius}px`;
+                    circle.classList.add('ripple');
+
+                    const rippleExists = target.getElementsByClassName('ripple')[0];
+                    if (rippleExists) {
+                        rippleExists.remove();
+                    }
+
+                    target.appendChild(circle);
+                }
+            });
+        }
+
+        // Listen for storage changes (Sync across tabs)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'appBalance' || e.key === 'appDiamonds') {
+                updateDashboardUI();
+            }
+        });
+
+        // Run Initialization
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>

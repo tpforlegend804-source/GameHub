@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Wallet</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --surface-light: #2c2c2c;
+            --primary-color: #00ff88;
+            --primary-dark: #00cc6a;
+            --danger-color: #ff4d4d;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background-color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            padding: 20px 16px;
+            flex-grow: 1;
+        }
+
+        /* Balance Card */
+        .wallet-card {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-card::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .wallet-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallet-amount {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* Actions Section */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            background-color: var(--surface-light);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            background-color: #333;
+        }
+
+        .action-btn i {
+            font-size: 24px;
+        }
+
+        .btn-deposit i { color: var(--primary-color); }
+        .btn-withdraw i { color: var(--danger-color); }
+
+        .action-btn span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Quick Add Grid */
+        .section-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .chip {
+            background-color: var(--surface-color);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px;
+            border-radius: 25px;
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:active {
+            background-color: var(--primary-color);
+            color: #000;
+        }
+
+        /* Input Area */
+        .input-group {
+            position: relative;
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid transparent;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--primary-color);
+        }
+
+        .input-icon {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+
+        .amount-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            width: 100%;
+            padding: 10px 0;
+            outline: none;
+        }
+
+        .confirm-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 30px;
+            display: none; /* Hidden until mode selected */
+        }
+        
+        .confirm-btn:active {
+            background-color: var(--primary-dark);
+        }
+
+        /* Transaction History */
+        .history-list {
+            list-style: none;
+        }
+
+        .history-item {
+            background-color: var(--surface-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .h-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .h-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .h-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .h-info p { font-size: 11px; color: var(--text-secondary); }
+
+        .h-amount { font-weight: 700; font-size: 15px; }
+        .h-plus { color: var(--primary-color); }
+        .h-minus { color: var(--danger-color); }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        
+        .toast.show { opacity: 1; }
+        .toast i { color: var(--primary-color); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="header-title">Wallet & Balance</div>
+    </header>
+
+    <main>
+        <!-- Balance Display -->
+        <div class="wallet-card">
+            <div class="wallet-label">
+                <i class="fa-solid fa-wallet"></i> Total Balance
+            </div>
+            <div class="wallet-amount" id="balanceDisplay">$0.00</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="section-label">Actions</div>
+        <div class="action-grid">
+            <div class="action-btn btn-deposit" onclick="setMode('deposit')">
+                <i class="fa-solid fa-circle-arrow-down"></i>
+                <span>Deposit</span>
+            </div>
+            <div class="action-btn btn-withdraw" onclick="setMode('withdraw')">
+                <i class="fa-solid fa-circle-arrow-up"></i>
+                <span>Withdraw</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Input Section -->
+        <div id="transactionSection" style="display:none;">
+            <div class="section-label" id="modeLabel">Select Amount</div>
+            
+            <!-- Quick Chips (Only for Deposit) -->
+            <div class="quick-grid" id="quickChips">
+                <div class="chip" onclick="fillAmount(5)">$5</div>
+                <div class="chip" onclick="fillAmount(10)">$10</div>
+                <div class="chip" onclick="fillAmount(50)">$50</div>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-dollar-sign input-icon"></i>
+                <input type="number" id="amountInput" class="amount-input" placeholder="Enter amount">
+            </div>
+
+            <button class="confirm-btn" id="confirmBtn" onclick="processTransaction()">Confirm Deposit</button>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="section-label" style="margin-top: 20px;">Recent Activity</div>
+        <ul class="history-list" id="historyList">
+            <!-- Items injected via JS -->
+            <li class="empty-state">No transactions yet</li>
+        </ul>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toastMsg">Success</span>
+    </div>
+
+    <script>
+        // --- LOGIC ---
+        
+        let currentMode = null; // 'deposit' or 'withdraw'
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshUI();
+            loadHistory();
+        });
+
+        // Update Balance UI
+        function refreshUI() {
+            const balance = parseFloat(localStorage.getItem('appBalance') || '0').toFixed(2);
+            document.getElementById('balanceDisplay').textContent = `$${balance}`;
+        }
+
+        // Set Transaction Mode
+        function setMode(mode) {
+            currentMode = mode;
+            const section = document.getElementById('transactionSection');
+            const label = document.getElementById('modeLabel');
+            const btn = document.getElementById('confirmBtn');
+            const chips = document.getElementById('quickChips');
+            
+            section.style.display = 'block';
+            btn.style.display = 'block';
+            
+            // Clear input
+            document.getElementById('amountInput').value = '';
+
+            if (mode === 'deposit') {
+                label.textContent = "Top Up Amount";
+                btn.textContent = "Confirm Deposit";
+                btn.style.backgroundColor = "var(--primary-color)";
+                chips.style.display = "grid";
+            } else {
+                label.textContent = "Withdraw Amount";
+                btn.textContent = "Request Withdrawal";
+                btn.style.backgroundColor = "var(--danger-color)";
+                chips.style.display = "none";
+            }
+            
+            // Scroll to input
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Quick Amount Filler
+        function fillAmount(val) {
+            document.getElementById('amountInput').value = val;
+        }
+
+        // Process Transaction
+        function processTransaction() {
+            const input = document.getElementById('amountInput');
+            const amount = parseFloat(input.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Please enter a valid amount", true);
+                return;
+            }
+
+            let currentBalance = parseFloat(localStorage.getItem('appBalance') || '0');
+
+            if (currentMode === 'deposit') {
+                // Add Funds
+                const newBalance = currentBalance + amount;
+                localStorage.setItem('appBalance', newBalance.toFixed(2));
+                
+                addToHistory('Deposit', amount, 'plus');
+                showToast(`Successfully added $${amount}`);
+            } 
+            else if (currentMode === 'withdraw') {
+                // Remove Funds
+                if (amount > currentBalance) {
+                    showToast("Insufficient Funds", true);
+                    return;
+                }
+                const newBalance = currentBalance - amount;
+                localStorage.setItem('appBalance', newBalance.toFixed(2));
+                
+                addToHistory('Withdrawal', amount, 'minus');
+                showToast(`Withdrawal of $${amount} initiated`);
+            }
+
+            // Reset UI
+            input.value = '';
+            document.getElementById('transactionSection').style.display = 'none';
+            refreshUI();
+            loadHistory();
+        }
+
+        // History Management
+        function addToHistory(type, amount, dir) {
+            const history = JSON.parse(localStorage.getItem('balanceHistory') || '[]');
+            const newEntry = {
+                id: Date.now(),
+                type: type,
+                amount: amount,
+                dir: dir,
+                date: new Date().toLocaleDateString()
+            };
+            
+            // Keep last 10 transactions
+            history.unshift(newEntry);
+            if (history.length > 10) history.pop();
+            
+            localStorage.setItem('balanceHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('balanceHistory') || '[]');
+
+            if (history.length === 0) {
+                list.innerHTML = '<li class="empty-state">No transactions yet</li>';
+                return;
+            }
+
+            list.innerHTML = '';
+            history.forEach(item => {
+                const isPlus = item.dir === 'plus';
+                const colorClass = isPlus ? 'h-plus' : 'h-minus';
+                const sign = isPlus ? '+' : '-';
+                const icon = isPlus ? 'fa-arrow-down' : 'fa-arrow-up'; // visual logic: arrow down into wallet is deposit
+
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div class="h-left">
+                        <div class="h-icon">
+                            <i class="fa-solid ${icon}" style="color: ${isPlus ? '#00ff88' : '#ff4d4d'}"></i>
+                        </div>
+                        <div class="h-info">
+                            <h4>${item.type}</h4>
+                            <p>${item.date}</p>
+                        </div>
+                    </div>
+                    <div class="h-amount ${colorClass}">${sign}$${item.amount.toFixed(2)}</div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Toast Helper
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            
+            toastMsg.textContent = msg;
+            toast.style.borderLeft = isError ? "4px solid var(--danger-color)" : "4px solid var(--primary-color)";
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

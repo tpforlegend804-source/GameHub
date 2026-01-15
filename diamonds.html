@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Diamond Store</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --surface-light: #2c2c2c;
+            --primary-color: #00d2ff; /* Diamond Blue */
+            --primary-dark: #00a0cc;
+            --accent-color: #00ff88; /* Cash Green */
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --danger-color: #ff4d4d;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background-color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            padding: 20px 16px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        /* Diamond Hero Card */
+        .diamond-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .diamond-card i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.9);
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+        }
+
+        .diamond-count {
+            font-size: 42px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .diamond-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 20px 0 15px 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Watch Ad Button */
+        .ad-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #FF512F 0%, #DD2476 100%); /* Video/Play colors */
+            border: none;
+            padding: 18px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ad-btn:active {
+            transform: scale(0.98);
+        }
+
+        .ad-badge {
+            background: rgba(0,0,0,0.3);
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        /* Exchange Section */
+        .exchange-box {
+            background-color: var(--surface-light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .exchange-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .exchange-rate {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-field {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .convert-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .convert-btn:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Shop Grid */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .shop-item {
+            background-color: var(--surface-light);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .shop-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .item-icon {
+            font-size: 30px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .item-qty {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            font-size: 12px;
+            color: var(--accent-color);
+            background: rgba(0, 255, 136, 0.1);
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+
+        /* Overlay for Ad Simulation */
+        .ad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .ad-text { color: white; font-weight: 500; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="header-title">Diamond Store</div>
+    </header>
+
+    <main>
+        <!-- Hero Card -->
+        <div class="diamond-card">
+            <i class="fa-solid fa-gem"></i>
+            <div class="diamond-count" id="displayDiamonds">0</div>
+            <div class="diamond-label">Available Diamonds</div>
+        </div>
+
+        <!-- Earn Section -->
+        <div class="section-title">
+            <i class="fa-solid fa-video"></i> Earn Free Diamonds
+        </div>
+        <button class="ad-btn" onclick="watchAd()">
+            <i class="fa-solid fa-play"></i>
+            <span>Watch Video Ad</span>
+            <span class="ad-badge">+50 <i class="fa-solid fa-gem"></i></span>
+        </button>
+
+        <!-- Exchange Section -->
+        <div class="section-title">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Convert to Cash
+        </div>
+        <div class="exchange-box">
+            <div class="exchange-info">
+                Rate: <span class="exchange-rate">100 Diamonds = $1.00</span>
+            </div>
+            <div class="input-row">
+                <input type="number" id="convertInput" class="input-field" placeholder="Diamonds to convert">
+            </div>
+            <button class="convert-btn" onclick="convertDiamonds()">
+                <i class="fa-solid fa-money-bill-transfer"></i> Convert Now
+            </button>
+        </div>
+
+        <!-- Shop Section -->
+        <div class="section-title">
+            <i class="fa-solid fa-cart-shopping"></i> Buy Diamonds
+        </div>
+        <div class="shop-grid">
+            <div class="shop-item" onclick="buyPack(100, 1.20)">
+                <div class="item-icon"><i class="fa-solid fa-gem"></i></div>
+                <div class="item-qty">100</div>
+                <div class="item-price">$1.20</div>
+            </div>
+            <div class="shop-item" onclick="buyPack(500, 5.00)">
+                <div class="item-icon"><i class="fa-solid fa-gem"></i></div>
+                <div class="item-qty">500</div>
+                <div class="item-price">$5.00</div>
+            </div>
+            <div class="shop-item" onclick="buyPack(1000, 9.50)">
+                <div class="item-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="item-qty">1,000</div>
+                <div class="item-price">$9.50</div>
+            </div>
+            <div class="shop-item" onclick="buyPack(5000, 45.00)">
+                <div class="item-icon"><i class="fa-solid fa-crown"></i></div>
+                <div class="item-qty">5,000</div>
+                <div class="item-price">$45.00</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Ad Overlay -->
+    <div class="ad-overlay" id="adOverlay">
+        <div class="spinner"></div>
+        <div class="ad-text">Watching Ad...</div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">Operation Successful</div>
+
+    <script>
+        // --- LOGIC ---
+        
+        // Config
+        const AD_REWARD = 50;
+        const EXCHANGE_RATE = 100; // 100 Diamonds = $1.00
+        const AD_DURATION = 3000; // 3 Seconds
+
+        document.addEventListener('DOMContentLoaded', refreshUI);
+
+        function refreshUI() {
+            const diamonds = parseInt(localStorage.getItem('appDiamonds') || '0');
+            document.getElementById('displayDiamonds').textContent = diamonds.toLocaleString();
+            
+            // Validate Convert Button
+            const input = document.getElementById('convertInput');
+            const btn = document.querySelector('.convert-btn');
+            
+            // Simple validator for UX
+            input.oninput = () => {
+                const val = parseInt(input.value);
+                if (val > 0 && val <= diamonds) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                }
+            };
+            // Trigger input once
+            input.dispatchEvent(new Event('input'));
+        }
+
+        // 1. Watch Ad Logic
+        function watchAd() {
+            const overlay = document.getElementById('adOverlay');
+            overlay.style.display = 'flex';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                addDiamonds(AD_REWARD);
+                showToast(`Rewarded +${AD_REWARD} Diamonds!`);
+            }, AD_DURATION);
+        }
+
+        // 2. Convert Logic
+        function convertDiamonds() {
+            const input = document.getElementById('convertInput');
+            const amount = parseInt(input.value);
+            const currentDiamonds = parseInt(localStorage.getItem('appDiamonds') || '0');
+
+            if (isNaN(amount) || amount <= 0) {
+                showToast('Enter valid amount');
+                return;
+            }
+
+            if (amount > currentDiamonds) {
+                showToast('Not enough diamonds');
+                return;
+            }
+
+            if (amount < EXCHANGE_RATE) {
+                showToast(`Min conversion is ${EXCHANGE_RATE} Diamonds`);
+                return;
+            }
+
+            // Calculate Cash
+            const cashEarned = (amount / EXCHANGE_RATE).toFixed(2);
+            
+            // Update Diamonds
+            const newDiamonds = currentDiamonds - amount;
+            localStorage.setItem('appDiamonds', newDiamonds);
+
+            // Update Balance
+            let currentBalance = parseFloat(localStorage.getItem('appBalance') || '0');
+            let newBalance = currentBalance + parseFloat(cashEarned);
+            localStorage.setItem('appBalance', newBalance.toFixed(2));
+
+            // Log Transaction (Optional, visible in Balance History)
+            const history = JSON.parse(localStorage.getItem('balanceHistory') || '[]');
+            history.unshift({
+                id: Date.now(),
+                type: 'Diamond Convert',
+                amount: parseFloat(cashEarned),
+                dir: 'plus',
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('balanceHistory', JSON.stringify(history));
+
+            // Reset UI
+            input.value = '';
+            refreshUI();
+            showToast(`Converted to $${cashEarned}`);
+        }
+
+        // 3. Buy Packs Logic
+        function buyPack(diamonds, cost) {
+            let currentBalance = parseFloat(localStorage.getItem('appBalance') || '0');
+
+            if (currentBalance < cost) {
+                showToast('Insufficient Wallet Balance');
+                return;
+            }
+
+            // Deduct Cash
+            const newBalance = currentBalance - cost;
+            localStorage.setItem('appBalance', newBalance.toFixed(2));
+
+            // Add Diamonds
+            addDiamonds(diamonds);
+            
+            // Log Transaction
+            const history = JSON.parse(localStorage.getItem('balanceHistory') || '[]');
+            history.unshift({
+                id: Date.now(),
+                type: 'Bought Diamonds',
+                amount: cost,
+                dir: 'minus',
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('balanceHistory', JSON.stringify(history));
+
+            showToast(`Purchased ${diamonds} Diamonds!`);
+        }
+
+        // Helper: Add Diamonds safely
+        function addDiamonds(amount) {
+            let current = parseInt(localStorage.getItem('appDiamonds') || '0');
+            localStorage.setItem('appDiamonds', current + amount);
+            refreshUI();
+        }
+
+        // Helper: Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
