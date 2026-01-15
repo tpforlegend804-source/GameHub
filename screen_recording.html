@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Screen Recorder</title>
+    <!-- Font Awesome & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* CSS Wahi purana design hai */
+        :root { --bg-color: #121212; --surface-color: #1e1e1e; --primary-color: #ff4757; --text-primary: #ffffff; --text-secondary: #aaaaaa; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; }
+        header { height: 60px; background-color: var(--surface-color); display: flex; align-items: center; padding: 0 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .back-btn { background: none; border: none; color: white; font-size: 20px; margin-right: 10px; cursor: pointer; }
+        .header-title { font-size: 18px; font-weight: 500; }
+        main { flex-grow: 1; padding: 20px 16px; overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .recorder-panel { background: linear-gradient(135deg, #2c3e50 0%, #000000 100%); border-radius: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .record-btn { width: 80px; height: 80px; border-radius: 50%; background: #2c2c2c; border: 4px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .record-inner { width: 60px; height: 60px; border-radius: 50%; background: var(--primary-color); transition: 0.3s; }
+        .is-recording .record-btn { border-color: rgba(255, 71, 87, 0.5); }
+        .is-recording .record-inner { border-radius: 8px; width: 35px; height: 35px; }
+        .status-text { margin-top: 15px; font-size: 16px; color: var(--text-secondary); }
+        .timer { font-size: 24px; font-weight: 700; margin-top: 5px; display: none; }
+
+        .video-list { display: flex; flex-direction: column; gap: 10px; }
+        .video-item { background: #2c2c2c; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .v-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .v-meta { font-size: 11px; color: #aaa; }
+        .v-actions { display: flex; gap: 10px; }
+        .action-icon { color: #aaa; font-size: 16px; cursor: pointer; padding: 5px; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; text-align: center; width: 90%; max-width: 300px; }
+        .toast.show { opacity: 1; }
+
+        /* Video Modal */
+        .video-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 200; display: none; justify-content: center; align-items: center; }
+        .close-video { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; background: none; border: none; z-index: 201; }
+        video { width: 100%; max-height: 100vh; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="back-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="header-title">Screen Recorder</div>
+    </header>
+
+    <main>
+        <div class="recorder-panel" id="recorderPanel">
+            <div class="record-btn" onclick="toggleRecording()">
+                <div class="record-inner"></div>
+            </div>
+            <div class="status-text" id="statusText">Tap to Start</div>
+            <div class="timer" id="timer">00:00</div>
+        </div>
+
+        <div style="margin-bottom:10px; font-size:12px; color:#666;">SAVED RECORDINGS</div>
+        <div class="video-list" id="videoList">
+            <div style="text-align:center; padding:20px; color:#555;">No videos yet</div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Player -->
+    <div class="video-modal" id="playerModal">
+        <button class="close-video" onclick="closePlayer()">&times;</button>
+        <video id="mainPlayer" controls playsinline></video>
+    </div>
+
+    <script>
+        // --- LOGIC ---
+        let mediaRecorder;
+        let chunks = [];
+        let isRecording = false;
+        let timerInt;
+        let db;
+
+        // DB Setup
+        const req = indexedDB.open("GameHubRec", 1);
+        req.onupgradeneeded = e => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("videos")) db.createObjectStore("videos", { keyPath: "id" });
+        };
+        req.onsuccess = e => { db = e.target.result; loadVideos(); };
+
+        // Main Function
+        async function toggleRecording() {
+            if (isRecording) {
+                stopRec();
+            } else {
+                // Direct call to avoid user gesture issues
+                try {
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: "screen" },
+                        audio: false // Audio OFF kar diya taake crash na ho
+                    });
+                    
+                    startRec(stream);
+                } catch (err) {
+                    showToast("Error: " + err.message, true);
+                    console.error(err);
+                }
+            }
+        }
+
+        function startRec(stream) {
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            chunks = [];
+            
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.onstop = saveVideo;
+            
+            // Stop if user uses system controls
+            stream.getVideoTracks()[0].onended = stopRec;
+
+            mediaRecorder.start();
+            isRecording = true;
+            
+            // UI Update
+            document.querySelector('.recorder-panel').classList.add('is-recording');
+            document.getElementById('statusText').innerText = "Recording...";
+            document.getElementById('statusText').style.color = "#ff4757";
+            document.getElementById('timer').style.display = "block";
+            
+            // Timer
+            let sec = 0;
+            timerInt = setInterval(() => {
+                sec++;
+                let m = Math.floor(sec/60).toString().padStart(2,'0');
+                let s = (sec%60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopRec() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(t => t.stop());
+            }
+            isRecording = false;
+            clearInterval(timerInt);
+            
+            // UI Reset
+            document.querySelector('.recorder-panel').classList.remove('is-recording');
+            document.getElementById('statusText').innerText = "Tap to Start";
+            document.getElementById('statusText').style.color = "#aaa";
+        }
+
+        function saveVideo() {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const id = Date.now();
+            const vid = {
+                id: id,
+                blob: blob,
+                name: "Rec_" + new Date().toLocaleTimeString(),
+                size: (blob.size/1024/1024).toFixed(1) + "MB"
+            };
+            
+            const tx = db.transaction(["videos"], "readwrite");
+            tx.objectStore("videos").add(vid);
+            tx.oncomplete = () => {
+                showToast("Video Saved!");
+                loadVideos();
+            };
+        }
+
+        function loadVideos() {
+            const tx = db.transaction(["videos"], "readonly");
+            const store = tx.objectStore("videos");
+            const req = store.getAll();
+            req.onsuccess = () => {
+                const list = document.getElementById('videoList');
+                list.innerHTML = "";
+                const files = req.result.reverse();
+                
+                if(files.length === 0) {
+                    list.innerHTML = "<div style='text-align:center; padding:20px; color:#555;'>No videos yet</div>";
+                    return;
+                }
+
+                files.forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = "video-item";
+                    div.innerHTML = `
+                        <div class="v-info"><h4>${f.name}</h4><div class="v-meta">${f.size}</div></div>
+                        <div class="v-actions">
+                            <i class="fa-solid fa-play action-icon" onclick="playVid(${f.id})"></i>
+                            <i class="fa-solid fa-download action-icon" onclick="dlVid(${f.id})"></i>
+                            <i class="fa-solid fa-trash action-icon" onclick="delVid(${f.id})"></i>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            };
+        }
+
+        function playVid(id) {
+            const tx = db.transaction(["videos"], "readonly");
+            tx.objectStore("videos").get(id).onsuccess = e => {
+                const url = URL.createObjectURL(e.target.result.blob);
+                document.getElementById('mainPlayer').src = url;
+                document.getElementById('playerModal').style.display = 'flex';
+                document.getElementById('mainPlayer').play();
+            };
+        }
+        
+        function dlVid(id) {
+            const tx = db.transaction(["videos"], "readonly");
+            tx.objectStore("videos").get(id).onsuccess = e => {
+                const url = URL.createObjectURL(e.target.result.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = e.target.result.name + ".mp4";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+            };
+        }
+
+        function delVid(id) {
+            if(confirm("Delete?")) {
+                const tx = db.transaction(["videos"], "readwrite");
+                tx.objectStore("videos").delete(id).onsuccess = () => {
+                    showToast("Deleted");
+                    loadVideos();
+                };
+            }
+        }
+
+        function closePlayer() {
+            document.getElementById('mainPlayer').pause();
+            document.getElementById('playerModal').style.display = 'none';
+        }
+
+        function showToast(msg, err=false) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.background = err ? "#ff4757" : "#333";
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
